@@ -10,7 +10,9 @@ import (
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	log.Info().Str("foo", "bar").Msg("Hello world")
+	log.Info().Msg("smilerestore executing...")
+	log.Info().Str("author", "Zach Snyder").Str("company", "intunetech").Str("license", "GPL v3.0").Msg("general info")
+
 }
 
 // Output: {"time":1516134303,"level":"debug","message":"hello world"}
