@@ -39,19 +39,17 @@ func main() {
 		log.Error().Msg(err.Error())
 	}
 
+	// loop working directory slice
 	for _, subdir := range workingDir {
-		recoverNeeded(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
+		checkDirectory(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
 	}
 
 }
 
-func recoverNeeded(name string, fullpath string) (bool, error) {
+func checkDirectory(name string, fullpath string) (bool, error) {
+	// function checks if specified directory contains a subdirectory containing files needing recovery
 	log.Info().Str("name", name).Str("path", fullpath).Msg("checking dir")
 	return false, nil
-}
-
-func checkDirectory(dir string) (string, error) {
-	return "0", nil
 }
 
 func recoverFile(filename string) (string, error) {
