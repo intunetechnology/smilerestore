@@ -68,10 +68,21 @@ func checkDirectory(name string, path string) bool {
 
 func recoverFile(path string) string {
 	// break down directory composition into a slice
+	patientDir, err := ioutil.ReadDir(path)
+	if err != nil {
+		log.Error().Msg(err.Error())
+	}
 
 	// break down OriginalImages.XVA into a slice
+	recoveryDir, err := ioutil.ReadDir(filepath.Join(path, "OriginalImages.XVA"))
+	if err != nil {
+		log.Error().Msg(err.Error())
+	}
 
 	// perform comparison
+	for _, subdir := range patientDir {
+
+	}
 
 	// rename and move file
 
