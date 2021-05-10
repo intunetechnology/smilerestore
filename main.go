@@ -57,7 +57,7 @@ func checkDirectory(name string, path string) (bool, error) {
 	log.Warn().Str("path", fp).Msg("Recovery directory exists")
 	// check if dir
 	if !file.IsDir() {
-		log.Error().Str("path", fp).Msg("Error: OriginalImages.XVA is a file not a directory")
+		log.Fatal().Str("path", fp).Msg("Error: OriginalImages.XVA is a file not a directory")
 	}
 
 	// report back
@@ -68,4 +68,4 @@ func checkDirectory(name string, path string) (bool, error) {
 func recoverFile(filename string) (string, error) {
 	return "0", nil
 
-}
+}dd
