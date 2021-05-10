@@ -67,6 +67,14 @@ func checkDirectory(name string, path string) bool {
 }
 
 func recoverFile(path string) string {
-	log.Info().Str("name", "example name").Float64("fsize", 0.1000).Str("path", ".").Msg("Attempting recovery")
+	// break down directory composition into a slice
+
+	// break down OriginalImages.XVA into a slice
+
+	// perform comparison
+
+	// rename and move file
+
+	log.Info().Msg("Attempting recovery")
 	return "0"
 }
