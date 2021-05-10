@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -32,9 +33,20 @@ func main() {
 
 	log.Info().Str("path", *pathStr).Msg("execution path")
 
+	// obtain slice of image directory and loop
+	workingDir, err := ioutil.ReadDir(*pathStr)
+	if err != nil {
+		log.Error().Msg(err.Error())
+	}
+
+	for _, subdir := range workingDir {
+		recoverNeeded(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
+	}
+
 }
 
-func recoverNeeded(dir string) (bool, error) {
+func recoverNeeded(name string, fullpath string) (bool, error) {
+	log.Info().Str("name", name).Str("path", fullpath).Msg("checking dir")
 	return false, nil
 }
 
