@@ -68,4 +68,4 @@ func checkDirectory(name string, path string) (bool, error) {
 func recoverFile(filename string) (string, error) {
 	return "0", nil
 
-}dd
+}
