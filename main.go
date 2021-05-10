@@ -21,6 +21,15 @@ func main() {
 	}
 
 	pathStr := flag.String("path", path, "desired file path where program will execute")
+
 	log.Info().Str("path", *pathStr).Msg("execution path ")
 
+}
+
+func checkDirectory(dir string) (string, error) {
+	return "0", nil
+}
+
+func recoverFile(filename string) (string, error) {
+	return "0", nil
 }
