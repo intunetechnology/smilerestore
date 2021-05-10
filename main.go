@@ -41,31 +41,32 @@ func main() {
 
 	// loop working directory slice
 	for _, subdir := range workingDir {
-		log.Info().Str("name", subdir.Name()).Msg("checking dir")
-		checkDirectory(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
+		log.Info().Str("name", subdir.Name()).Msg("checking")
+		needsAction := checkDirectory(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
+		if needsAction {
+			recoverFile(filepath.Join(*pathStr, subdir.Name()))
+		}
 	}
 
 }
 
-func checkDirectory(name string, path string) (bool, error) {
+func checkDirectory(name string, path string) bool {
 	// function checks if specified directory contains a subdirectory containing files needing recovery
 	fp := filepath.Join(path, "OriginalImages.XVA")
 	file, err := os.Stat(fp)
 	if os.IsNotExist(err) {
-		return false, nil
+		return false
 	}
-	log.Warn().Str("path", fp).Msg("Recovery directory exists")
 	// check if dir
 	if !file.IsDir() {
 		log.Fatal().Str("path", fp).Msg("Error: OriginalImages.XVA is a file not a directory")
 	}
+	log.Warn().Str("path", fp).Msg("Recovery directory exists")
 
-	// report back
-	// log.Log().Msg("test")
-	return false, nil
+	return true
 }
 
-func recoverFile(filename string) (string, error) {
-	return "0", nil
-
+func recoverFile(path string) string {
+	log.Info().Str("name", "example name").Float64("fsize", 0.1000).Str("path", ".").Msg("Attempting recovery")
+	return "0"
 }
