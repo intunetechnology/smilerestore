@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -80,8 +81,10 @@ func recoverFile(path string) string {
 	}
 
 	// perform comparison
-	for _, subdir := range patientDir {
-
+	for _, a := range patientDir {
+		for _, b := range recoveryDir {
+			log.Log().Msg(fmt.Sprintf("Comparing %s <-> %s", a.Name(), b.Name()))
+		}
 	}
 
 	// rename and move file
