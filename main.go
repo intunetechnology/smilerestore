@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 
 	"github.com/rs/zerolog"
@@ -13,6 +14,13 @@ func main() {
 	log.Info().Msg("smilerestore executing...")
 	log.Info().Str("author", "Zach Snyder").Str("company", "intunetech").Str("license", "GPL v3.0").Msg("general info")
 
-}
+	path, err := os.Getwd()
 
-// Output: {"time":1516134303,"level":"debug","message":"hello world"}
+	if err != nil {
+		log.Error().Msg(err.Error())
+	}
+
+	pathStr := flag.String("path", path, "desired file path where program will execute")
+	log.Info().Str("path", *pathStr).Msg("execution path ")
+
+}
