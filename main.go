@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -46,13 +48,14 @@ func main() {
 		log.Info().Str("name", subdir.Name()).Msg("checking")
 		needsAction := checkDirectory(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
 		if needsAction {
-			go recoverFile(filepath.Join(*pathStr, subdir.Name()))
+			recoverFile(filepath.Join(*pathStr, subdir.Name()))
 		}
+		log.Log().Msg("-------------------------------------")
 	}
 
 }
 
-func checkDirectory(name string, path string) bool {
+func checkDirectory(name, path string) bool {
 	// function checks if specified directory contains a subdirectory containing files needing recovery
 	fp := filepath.Join(path, "OriginalImages.XVA")
 	file, err := os.Stat(fp)
@@ -68,11 +71,44 @@ func checkDirectory(name string, path string) bool {
 	return true
 }
 
-func compareFile(a string, b string) bool {
+func compareFile(a, b string) bool {
 	// function checks if two files a & b are the same data based on name
 	// example: file.auto vs file_Original.auto
-	log.Log().Msg(fmt.Sprintf("Comparing %s <-> %s", a, b))
+	c := strings.Split(a, ".")
+	d := strings.Fields(b)
+
+	if strings.ToLower(c[1]) == "auto" || strings.ToLower(c[1]) == "autoxvtag" {
+		// log.Log().Msg(fmt.Sprintf("Comparing %s <-> %s", a, b))
+		if c[0] == d[0] && c[1] == strings.Split(d[1], ".")[1] {
+			return true
+		}
+	}
 	return false
+}
+
+func copy(src, dst string) (int64, error) {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
 }
 
 func recoverFile(path string) string {
@@ -93,10 +129,19 @@ func recoverFile(path string) string {
 		for _, b := range recoveryDir {
 			// log.Log().Msg(fmt.Sprintf("Comparing %s <-> %s", a.Name(), b.Name()))
 			if compareFile(a.Name(), b.Name()) {
-				log.Info().Str("corrupted", a.Name()).Str("original", b.Name()).Msg("match found")
 				// rename and move file
-
-				log.Info().Msg("Attempting recovery")
+				log.Info().Str("corrupted", a.Name()).Str("original", b.Name()).Msg("match found, Attempting recovery")
+				// store paths
+				corrupt := filepath.Join(path, a.Name())
+				original := filepath.Join(filepath.Join(path, "OriginalImages.XVA"), b.Name())
+				log.Log().Str("path", corrupt).Msg("corrupt")
+				log.Log().Str("path", original).Msg("original")
+				// copy files
+				bytes, err := copy(original, corrupt)
+				if err != nil {
+					log.Error().Str("event", "copy").Msg(err.Error())
+				}
+				log.Info().Str("event", "copy").Msg(fmt.Sprintf("success, copied %d bytes", bytes))
 			}
 		}
 	}
