@@ -48,26 +48,32 @@ func main() {
 	if err != nil {
 		log.Error().Msg(err.Error())
 	}
-
-	log.Info().Msg("checking for matching patient id")
 	log.Log().Msg("-------------------------------------")
-	// loop working directory slice
-	// look for matching patient id
-	for _, subdir := range workingDir {
-		if strings.Split(subdir.Name(), "_")[1] == *patientId {
-			// patient found do work
-			log.Info().Str("directory", subdir.Name()).Msg("patient found")
-			// just in case, check if original image directory exists or if its a directory
-			needsAction := checkDirectory(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
-			if needsAction {
-				// perform corrective action
-				recoverFile(filepath.Join(*pathStr, subdir.Name()))
-			} else {
-				log.Info().Str("directory", subdir.Name()).Msg("no original images directory found, no work to be done")
+	if *patientId != "0" {
+		log.Info().Msg("checking for matching patient id")
+
+		// loop working directory slice
+		// if patient id not zero look for matching patient id
+
+		for _, subdir := range workingDir {
+			if strings.Split(subdir.Name(), "_")[1] == *patientId {
+				// patient found do work
+				log.Info().Str("directory", subdir.Name()).Msg("patient found")
+				// just in case, check if original image directory exists or if its a directory
+				needsAction := checkDirectory(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
+				if needsAction {
+					// perform corrective action
+					recoverFile(filepath.Join(*pathStr, subdir.Name()))
+				} else {
+					log.Info().Str("directory", subdir.Name()).Msg("no original images directory found, no work to be done")
+				}
 			}
-			log.Log().Msg("-------------------------------------")
 		}
+	} else {
+		log.Warn().Msg("patient id not specified, please use --patient flag to specify")
+		log.Warn().Msg("example: .\\smilerestore.exe --path=..\\to_be_recovered\\. --patient=2315 ")
 	}
+	log.Log().Msg("-------------------------------------")
 	log.Info().Msg("done")
 }
 
