@@ -16,7 +16,10 @@ import (
 
 func main() {
 	// intialize logger
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log.Logger = log.Output(zerolog.ConsoleWriter{
+		NoColor: true,
+		Out:     os.Stderr,
+	})
 
 	log.Info().Msg("smilerestore executing...")
 	log.Info().Str("author", "Zach Snyder").Str("company", "intunetech").Str("license", "GPL v3.0").Msg("general info")
@@ -28,14 +31,17 @@ func main() {
 	}
 
 	// establish path flag and parse input, default to execpath, record as full path
+	// establish which patient program is executing on based on ID
 	pathStr := flag.String("path", execpath, "desired file path where program will execute")
+	patientId := flag.String("patient", "0", "ID of patient program will perform corrective action on")
 	flag.Parse()
 	*pathStr, err = filepath.Abs(*pathStr) // convert to absolute path
 	if err != nil {
 		log.Error().Msg(err.Error())
 	}
 
-	log.Info().Str("path", *pathStr).Msg("execution path")
+	log.Info().Str("path", *pathStr).Msg("using")
+	log.Info().Str("patient", *patientId).Msg("using")
 
 	// obtain slice of image directory and loop
 	workingDir, err := ioutil.ReadDir(*pathStr)
@@ -43,16 +49,26 @@ func main() {
 		log.Error().Msg(err.Error())
 	}
 
+	log.Info().Msg("checking for matching patient id")
+	log.Log().Msg("-------------------------------------")
 	// loop working directory slice
+	// look for matching patient id
 	for _, subdir := range workingDir {
-		log.Info().Str("name", subdir.Name()).Msg("checking")
-		needsAction := checkDirectory(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
-		if needsAction {
-			recoverFile(filepath.Join(*pathStr, subdir.Name()))
+		if strings.Split(subdir.Name(), "_")[1] == *patientId {
+			// patient found do work
+			log.Info().Str("directory", subdir.Name()).Msg("patient found")
+			// just in case, check if original image directory exists or if its a directory
+			needsAction := checkDirectory(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
+			if needsAction {
+				// perform corrective action
+				recoverFile(filepath.Join(*pathStr, subdir.Name()))
+			} else {
+				log.Info().Str("directory", subdir.Name()).Msg("no original images directory found, no work to be done")
+			}
+			log.Log().Msg("-------------------------------------")
 		}
-		log.Log().Msg("-------------------------------------")
 	}
-
+	log.Info().Msg("done")
 }
 
 func checkDirectory(name, path string) bool {
@@ -145,6 +161,5 @@ func recoverFile(path string) string {
 			}
 		}
 	}
-
 	return "0"
 }
