@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -17,7 +18,7 @@ func main() {
 
 	log.Info().Msg("smilerestore executing...")
 	log.Info().Str("author", "Zach Snyder").Str("company", "intunetech").Str("license", "GPL v3.0").Msg("general info")
-
+	time.Sleep(100)
 	// fill path variable with execution directory
 	execpath, err := os.Getwd()
 	if err != nil {
@@ -45,7 +46,7 @@ func main() {
 		log.Info().Str("name", subdir.Name()).Msg("checking")
 		needsAction := checkDirectory(subdir.Name(), filepath.Join(*pathStr, subdir.Name()))
 		if needsAction {
-			recoverFile(filepath.Join(*pathStr, subdir.Name()))
+			go recoverFile(filepath.Join(*pathStr, subdir.Name()))
 		}
 	}
 
@@ -67,6 +68,13 @@ func checkDirectory(name string, path string) bool {
 	return true
 }
 
+func compareFile(a string, b string) bool {
+	// function checks if two files a & b are the same data based on name
+	// example: file.auto vs file_Original.auto
+	log.Log().Msg(fmt.Sprintf("Comparing %s <-> %s", a, b))
+	return false
+}
+
 func recoverFile(path string) string {
 	// break down directory composition into a slice
 	patientDir, err := ioutil.ReadDir(path)
@@ -80,15 +88,18 @@ func recoverFile(path string) string {
 		log.Error().Msg(err.Error())
 	}
 
-	// perform comparison
+	// comparison loop
 	for _, a := range patientDir {
 		for _, b := range recoveryDir {
-			log.Log().Msg(fmt.Sprintf("Comparing %s <-> %s", a.Name(), b.Name()))
+			// log.Log().Msg(fmt.Sprintf("Comparing %s <-> %s", a.Name(), b.Name()))
+			if compareFile(a.Name(), b.Name()) {
+				log.Info().Str("corrupted", a.Name()).Str("original", b.Name()).Msg("match found")
+				// rename and move file
+
+				log.Info().Msg("Attempting recovery")
+			}
 		}
 	}
 
-	// rename and move file
-
-	log.Info().Msg("Attempting recovery")
 	return "0"
 }
