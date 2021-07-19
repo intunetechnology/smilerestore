@@ -49,6 +49,7 @@ func main() {
 		log.Error().Msg(err.Error())
 	}
 	log.Log().Msg("-------------------------------------")
+	// if no patient was specified dont run, explain why/how
 	if *patientId != "0" {
 		log.Info().Msg("checking for matching patient id")
 
